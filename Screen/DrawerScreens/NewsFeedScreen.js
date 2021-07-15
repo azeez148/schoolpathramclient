@@ -49,6 +49,8 @@ const NewsFeedScreen = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [images, setImages] = useState([]);
   const {width} = Dimensions.get('window');
+  const [isAdmin, setIsAdmin] = useState(false);
+
   let userInfo = {};
 
   useEffect(async () => {
@@ -58,6 +60,7 @@ const NewsFeedScreen = props => {
     setToken(userInfo.token);
     setUserInfo(userInfo);
     console.log(userInfo);
+    setIsAdmin(userInfo.isAdmin);
     let url = GlobalProperties.BASE_URL + '/spnewsfeed/list-newsfeed/';
     fetch(url, {
       method: 'GET',
@@ -152,9 +155,16 @@ const NewsFeedScreen = props => {
         // If server response message same as Data Matched
         if (responseJson.success === true) {
           console.log(responseJson.data);
-          newsfeeds.push(responseJson.data);
+          // newsfeeds.push(responseJson.data);
           setModalVisible(false);
           clearInput();
+          if (newsfeeds.length > 0) {
+            alert('New items availible, Please refresh to update.');
+          }
+          else {
+            newsfeeds.push(responseJson.data);
+          }
+          
         } else {
           let errorMessage = 'Unexpected error, Please try again.';
           setErrortext(errorMessage);
@@ -223,15 +233,17 @@ const NewsFeedScreen = props => {
   return (
     <View style={styles.mainBody}>
       <Loader loading={loading} />
-      <View style={styles.card} visible={userInfo.isAdmin}>
-        <View style={styles.createPostContent}>
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={() => setModalVisible(true)}>
-            <Text style={styles.createButtonText}>Create a Post</Text>
-          </TouchableOpacity>
+      {isAdmin ? (
+        <View style={styles.card}>
+          <View style={styles.createPostContent}>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={() => setModalVisible(true)}>
+              <Text style={styles.createButtonText}>Create a Post</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      ) : null}
 
       <Modal
         animationType={'fade'}

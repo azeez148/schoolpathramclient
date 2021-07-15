@@ -16,8 +16,6 @@ import RegisterScreen from './Screen/RegisterScreen';
 import DrawerNavigationRoutes from './Screen/DrawerNavigationRoutes';
 import NewsFeedDetailScreen from './Screen/DrawerScreens/NewsFeedDetailScreen';
 
-
-
 const Stack = createStackNavigator();
 
 const Auth = () => {

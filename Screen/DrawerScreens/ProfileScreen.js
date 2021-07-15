@@ -30,29 +30,67 @@ const ProfileScreen = () => {
   const [errortext, setErrortext] = useState('');
   const [token, setToken] = useState('');
   const [uuid, setUUID] = useState('');
-  const [profilePictureModalVisible, setProfilePictureModalVisible] = useState(false);
-  
-  const [profilePictureViewModalVisible, setProfilePictureViewModalVisible] = useState(false);
+  const [profilePictureModalVisible, setProfilePictureModalVisible] =
+    useState(false);
+  const [profilePictureViewModalVisible, setProfilePictureViewModalVisible] =
+    useState(false);
 
   const [profileImage, setProfileImage] = useState(null);
-
-  const [profileUri, setProfileImageUri] = useState('https://bootdey.com/img/Content/avatar/avatar6.png');
+  const [profileUri, setProfileImageUri] = useState(
+    'https://bootdey.com/img/Content/avatar/avatar6.png',
+  );
 
   const userFNameInputRef = createRef();
   const userLNameInputRef = createRef();
 
-  const sample_avatar_uri = 'https://bootdey.com/img/Content/avatar/avatar6.png';
+  const sample_avatar_uri =
+    'https://bootdey.com/img/Content/avatar/avatar6.png';
 
+  // // useEffect(async () => {
+  //   const userData = await AsyncStorage.getItem('@u_info');
+  //   const profileImageUrl = await AsyncStorage.getItem('u_profile_image');
+  //   let userInfo = JSON.parse(userData);
+  //   console.log(userInfo);
+    
+  //   setProfileImageUri(GlobalProperties.BASE_URL + profileImageUrl);
+  // }, []);
 
   useEffect(async () => {
-    const userData = await AsyncStorage.getItem('@u_info')
-    let userInfo = JSON.parse(userData);
-    console.log(userInfo);
+    const userData = await AsyncStorage.getItem('@u_info');
+    const profileImageUrl = await AsyncStorage.getItem('u_profile_image');
+    userInfo = JSON.parse(userData);
     setUUID(userInfo.uuid);
     setToken(userInfo.token);
     setEmail(userInfo.email);
     setFirstName(userInfo.firstName);
     setLastName(userInfo.lastName);
+    if (profileImageUrl != undefined) {
+      console.log('1');
+      setProfileImageUri(GlobalProperties.BASE_URL + profileImageUrl);
+    }
+    else {
+      let url = GlobalProperties.BASE_URL + '/spaccount/profile/';
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          //Header Defination
+          'Content-Type': 'application/json',
+          Authorization: 'Token ' + userInfo.token,
+        },
+      })
+        .then(data => {
+          return data.json();
+        })
+        .then(data => {
+          console.log(data.data);
+          // setNewsfeeds(data.data);
+          setProfileImageUri(GlobalProperties.BASE_URL + data.data.profile_image.url);
+  
+        })
+        .catch(() => {
+          console.log(123123);
+        });
+    }
     
   }, []);
 
@@ -153,6 +191,7 @@ const ProfileScreen = () => {
         // If server response message same as Data Matched
         if (responseJson.success === true) {
           console.log(responseJson.data);
+          setImageUrl(responseJson.data.image_url);
           setProfilePictureModalVisible(false);
         } else {
           let errorMessage = 'Unexpected error, Please try again.';
@@ -195,6 +234,14 @@ const ProfileScreen = () => {
 
   const viewProfileImage = () => {
     setProfilePictureViewModalVisible(true);
+  };
+
+  const setImageUrl = async value => {
+    try {
+      await AsyncStorage.setItem('u_profile_image', value);
+    } catch (e) {
+      // saving error
+    }
   };
 
   return (
@@ -270,7 +317,6 @@ const ProfileScreen = () => {
               <Text style={styles.info}>Shop</Text>
             </View>
           </View> */}
-
       </View>
 
       {/* modal PROFILE UPDATE */}
@@ -308,7 +354,7 @@ const ProfileScreen = () => {
                       <TextInput
                         style={styles.inputStyle}
                         value={lastName}
-                        onChangeText={(UserLName) => setLastName(UserLName)}
+                        onChangeText={UserLName => setLastName(UserLName)}
                         underlineColorAndroid="#f000"
                         placeholder="Enter Last Name"
                         placeholderTextColor="#8b9cb5"
@@ -319,7 +365,6 @@ const ProfileScreen = () => {
                       />
                     </View>
 
-
                     <TouchableOpacity
                       style={styles.buttonStyle}
                       activeOpacity={0.5}
@@ -327,19 +372,21 @@ const ProfileScreen = () => {
                       <Text style={styles.buttonTextStyle}>Update</Text>
                     </TouchableOpacity>
                   </KeyboardAvoidingView>
-
                 </View>
               </ScrollView>
             </View>
             <View style={styles.popupButtons}>
-              <TouchableOpacity onPress={() => { setModalVisible(false) }} style={styles.btnClose}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalVisible(false);
+                }}
+                style={styles.btnClose}>
                 <Text style={styles.txtClose}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-
 
       {/* modal PROFILE picture add*/}
 
@@ -396,7 +443,6 @@ const ProfileScreen = () => {
         </View>
       </Modal>
 
-
       {/* modal PROFILE picture view*/}
 
       <Modal
@@ -410,11 +456,11 @@ const ProfileScreen = () => {
               <ScrollView contentContainerStyle={styles.modalInfo}>
                 <View>
                   <Image
-                      source={{
-                        uri: profileUri,
-                      }}
-                      style={styles.imageView}
-                    />
+                    source={{
+                      uri: profileUri,
+                    }}
+                    style={styles.imageView}
+                  />
                 </View>
               </ScrollView>
             </View>
@@ -473,7 +519,7 @@ const styles = StyleSheet.create({
   infoContent: {
     flex: 1,
     alignItems: 'flex-start',
-    paddingLeft: 5
+    paddingLeft: 5,
   },
   iconContent: {
     flex: 1,
@@ -497,11 +543,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 30,
-    backgroundColor: "#00BFFF",
+    backgroundColor: '#00BFFF',
     width: 250,
   },
   shareButtonText: {
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     fontSize: 20,
   },
   /************ modals ************/
@@ -586,7 +632,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 1,
   },
   cardTitle: {
-    color: "#00BFFF"
+    color: '#00BFFF',
   },
 
   imageView: {
